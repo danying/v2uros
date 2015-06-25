@@ -49,6 +49,7 @@ while(ros::ok())
 //  ros::Duration(f).sleep();
   grabrate.sleep();
 
+  fg.release();
 //  if(count==100)
 //  {
 //      fg.release();
@@ -56,7 +57,7 @@ while(ros::ok())
 //  }
 }
 
-fg.release();
+
 fg.stop();
 
 
