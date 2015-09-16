@@ -1,5 +1,3 @@
-#include <iostream>
-#include <cstdio>
 #include "v2uros/framegrabber.h"
 
 int main(int argc, char** argv)
