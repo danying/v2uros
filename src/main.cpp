@@ -1,65 +1,44 @@
-#include <ros/ros.h>
 #include <iostream>
 #include <cstdio>
-
-
 #include "v2uros/framegrabber.h"
 
-
-int main(int argc, char** argv) {
-
-ROS_INFO("Hello world!");
-ROS_INFO("Started template C++ node: test_node.");
-
-ros::init(argc, argv, "test_node");
-ros::NodeHandle nh;
-
-
-FrameGrabber fg(nh);
-
-//cv::Mat image;
-
-fg.open();
-
-int w,h;
-double f;
-fg.detectVideoMode(h,w,f);
-ros::Rate grabrate(f);
-
-fg.start();
-
-static int count = 0;
-
-while(ros::ok())
+int main(int argc, char** argv)
 {
-  count ++;
-  ROS_INFO("test_node: main loop %d", count);
+    ros::init(argc, argv, "vga2usb");
+    ros::NodeHandle nh;
 
-//  std::stringstream fname;
-//  fname<<"frame"<<count<<"BGR24.txt";
+    FrameGrabber fg(nh);
 
-  fg.grabFrame(V2U_GRABFRAME_FORMAT_BGR24,NULL);
-//  fg.writeFrame(fname.str());
-//  fg.convertFrame(image);
-  fg.publishFrame();
+    if(!fg.open())
+    {
+        std::cout<<"Exiting ......\n";
+        fg.close();
+        return 1;
+    }
 
-//  cv::waitKey(0);
+    int w,h;
+    double f;
+    if(!fg.detectVideoMode(h,w,f))
+    {
+        std::cout<<"Exiting ......\n";
+        fg.close();
+        return 1;
+    }
 
-  ros::spinOnce();
-//  ros::Duration(f).sleep();
-  grabrate.sleep();
+    ros::Rate grabrate(f);
+    fg.start();
 
-//  if(count==100)
-//  {
-//      fg.release();
-//      break;
-//  }
-}
+    while(ros::ok())
+    {
 
-fg.release();
-fg.stop();
-
-
-return 0;
+        fg.grabFrame(V2U_GRABFRAME_FORMAT_BGR24,NULL);
+        fg.publishFrame();
+        ros::spinOnce();
+        grabrate.sleep();
+        fg.release();
+    }
+    fg.stop();
+    fg.close();
+    return 0;
 }
 

@@ -13,13 +13,15 @@
 #include "frmgrab.h"
 #include "v2u_lib.h"
 
+#include <cstdio>
+#include <iostream>
 #include <QMutex>
+#include <opencv2/opencv.hpp>
 
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
-#include <opencv2/opencv.hpp>
 
 class FrameGrabber{
 
@@ -33,16 +35,16 @@ private:
     image_transport::Publisher pub;
 
 public:
-    FrameGrabber(ros::NodeHandle & nh);//(FrmGrabber* aGrabber);
+    FrameGrabber(ros::NodeHandle & nh);
     ~FrameGrabber();
 
-    void open();
+    bool open();
     void close();
     void start();
     void stop();
     void release();
 
-    void detectVideoMode(int & height, int & width, double & freq);
+    bool detectVideoMode(int & height, int & width, double & freq);
     void grabFrame(V2U_UINT32 aFormat, const V2URect* aCrop);
     void writeFrame(std::string fname);
 

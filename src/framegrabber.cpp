@@ -8,18 +8,16 @@
 
 
 #include "v2uros/framegrabber.h"
-#include <cstdio>
-#include <iostream>
 
 
-FrameGrabber::FrameGrabber(ros::NodeHandle & nh):pnh(nh)//:iGrabber(aGrabber)
+FrameGrabber::FrameGrabber(ros::NodeHandle & nh):pnh(nh)
 {
     FrmGrab_Init();
     iGrabber = NULL;
     frame = NULL;
 
     it = new image_transport::ImageTransport(pnh);
-    pub = it->advertise("camera/image", 1);
+    pub = it->advertise("camera/image", 30);
 }
 
 FrameGrabber::~FrameGrabber()
@@ -29,11 +27,19 @@ FrameGrabber::~FrameGrabber()
     delete it;
 }
 
-void FrameGrabber::open()
+bool FrameGrabber::open()
 {
+    bool isOpen = false;
     iGrabber = FrmGrabLocal_Open();
     if(!iGrabber)
+    {
         std::cout<<"grabber open failed"<<std::endl;
+        isOpen = false;
+    }
+    else
+        isOpen = true;
+
+    return isOpen;
 }
 
 void FrameGrabber::close()
@@ -63,7 +69,7 @@ void FrameGrabber::release()
 }
 
 
-void FrameGrabber::detectVideoMode(int &height, int &width, double &freq)
+bool FrameGrabber::detectVideoMode(int &height, int &width, double &freq)
 {
     V2U_VideoMode vm;
     bool result = FrmGrab_DetectVideoMode(iGrabber, &vm);
@@ -80,6 +86,7 @@ void FrameGrabber::detectVideoMode(int &height, int &width, double &freq)
         height = width = 0;
         freq = 0;
     }
+    return result;
 }
 
 
@@ -136,17 +143,7 @@ void FrameGrabber::convertFrame(cv::Mat & image)
         int h = frame->mode.height;
         int w = frame->mode.width;
         image = cv::Mat(h,w,CV_8UC3,(uchar*)frame->pixbuf,3*w);
-//        std::cout<<image.row(0).col(0)<<std::endl;
-//        cv::imshow("Display Image", image);
     }
-
-//    FILE *out = fopen("/home/danying/ros_ws/rosbuild/v2uros/frame1BGR24.txt","rb");
-//    if(out)
-//    {
-//        char buffer[600*800*3];
-//        size_t size = fread(buffer,1,600*800*3,out);
-//        image = cv::Mat(600,800,CV_8UC3,(uchar*)buffer,3*800);
-//    }
 }
 
 
@@ -155,11 +152,6 @@ void FrameGrabber::publishFrame()
     cv::Mat image;
     convertFrame(image);
     sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
+    msg->header.stamp = ros::Time::now();
     pub.publish(msg);
 }
-
-
-
-//        for (int i = 0; i < 8; i++) {
-//            printf("%d", !!((a << i) & 0x80));
-//        }

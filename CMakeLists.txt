@@ -17,50 +17,21 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-
+FILE(GLOB HEADER_LIST ${PROJECT_SOURCE_DIR}/include/v2uros/*.h)
+FILE(GLOB SRC_LIST ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 find_package(Qt4 COMPONENTS QTCORE QTGUI)
 include_directories(${QT_INCLUDES})
 
-#set(QT_USE_QTGUI TRUE)
+find_package(OpenCV REQUIRED )
+include_directories(${OpenCV_INCLUDE_DIRS})
 
-find_package( OpenCV REQUIRED )
+include_directories(${PROJECT_SOURCE_DIR}/epiphan_sdk/epiphan/frmgrab/include
+                    ${PROJECT_SOURCE_DIR}/epiphan_sdk/epiphan/include
+                    ${PROJECT_SOURCE_DIR}/epiphan_sdk/epiphan/samples/v2u_lib/include)
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
-#find_package(Qt5Widgets)
-#include_directories(${Qt5Widgets_INCLUDE_DIRS})
-
-include_directories(./include
-                    /home/danying/workspace/epiphan_sdk/epiphan/frmgrab/include
-                    /home/danying/workspace/epiphan_sdk/epiphan/include
-                    /home/danying/workspace/epiphan_sdk/epiphan/samples/v2u_lib/include
-                    )
-
-FILE(GLOB HEADER_LIST include/*.h)
-FILE(GLOB HEADER_LIST include/v2uros/*.h)
-
-
-LINK_DIRECTORIES(/home/danying/workspace/epiphan_sdk/epiphan/frmgrab/lib/linux/x86_64/
-                 /home/danying/workspace/epiphan_sdk/opensource/slib
-                 )
-
-
-#aux_source_directory(. SRC_LIST)
-aux_source_directory(./src SRC_LIST)
+link_directories(${PROJECT_SOURCE_DIR}/epiphan_sdk/epiphan/frmgrab/lib/linux/x86_64/
+                 ${PROJECT_SOURCE_DIR}/epiphan_sdk/opensource/slib)
 
 rosbuild_add_executable(${PROJECT_NAME} ${SRC_LIST} ${HEADER_LIST})
-target_link_libraries(${PROJECT_NAME} frmgrab slava Qt4::QtCore ${OpenCV_LIBS} ${QT_QTGUI_LIBRARY})
-
-
-#uncomment if you have defined messages
-#rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
-
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME} frmgrab slava Qt4::QtCore ${OpenCV_LIBS})
